@@ -1,1 +1,24 @@
+/* Selezioniamo il tag <button> */
+button {
+  /* Forma e Spazio */
+  padding: 15px 30px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer; /* Fa apparire la manina */
 
+  /* Colori */
+  background-color: #6200ee; /* Viola moderno */
+  color: white;
+
+  /* Animazione fluida */
+  transition: all 0.3s ease;
+}
+
+/* Cosa succede al passaggio del mouse */
+button:hover {
+  background-color: #3700b3; /* Diventa più scuro */
+  transform: scale(1.05);     /* Si ingrandisce leggermente */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Aggiunge un'ombra */
+}
