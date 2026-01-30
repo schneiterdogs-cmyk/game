@@ -4,19 +4,15 @@ function cambiaBox(idDaMostrare) {
     const nuovoBox = document.getElementById(idDaMostrare);
 
     if (boxAttuale) {
-        // Effetto uscita
         boxAttuale.style.opacity = "0";
         boxAttuale.style.transform = "translateY(-10px)";
         
         setTimeout(() => {
             boxAttuale.classList.add('hidden');
-            
-            // Prepara nuovo box
             nuovoBox.classList.remove('hidden');
             nuovoBox.style.opacity = "0";
             nuovoBox.style.transform = "translateY(10px)";
             
-            // Effetto entrata
             setTimeout(() => {
                 nuovoBox.style.opacity = "1";
                 nuovoBox.style.transform = "translateY(0)";
@@ -25,8 +21,11 @@ function cambiaBox(idDaMostrare) {
     }
 }
 
+// 2. PRIMO INVIO (Newsletter / Controllo Mail)
 function gestisciNewsletter(event) {
     event.preventDefault();
+    console.log("1. Tasto Newsletter premuto!");
+
     const form = event.target;
     const dati = new FormData(form);
     dati.append('action', 'subscribe');
@@ -37,34 +36,37 @@ function gestisciNewsletter(event) {
     })
     .then(res => res.text())
     .then(risposta => {
-        // La risposta ora sarà: "VAI_A_RESET|free|TOKEN_UNICO"
+        console.log("2. Risposta Google:", risposta);
         const parti = risposta.split("|"); 
         const comando = parti[0];
         const status = parti[1];
-        const token = parti[2]; // <--- Questo è il tuo nuovo pezzetto!
+        const token = parti[2]; 
 
         localStorage.setItem('userStatus', status || 'free');
 
         if (comando === "VAI_A_LOGIN") {
             cambiaBox('login-section'); 
         } else if (comando === "VAI_A_RESET") {
-            // PRIMA di cambiare box, scriviamo il token nell'input hidden
-            if(token) {
+            // Inseriamo il token nel campo nascosto prima di mostrare il box
+            if (token) {
                 document.getElementById('token_input').value = token;
+                console.log("3. Token inserito nel form:", token);
             }
             cambiaBox('reset-section'); 
         }
     })
-    .catch(err => console.error("Errore:", err));
+    .catch(err => console.error("Errore Newsletter:", err));
 }
 
-// 3. LOGIN (Tasto Entraaa)
+// 3. GESTIONE LOGIN (Tasto Entraaa)
 document.getElementById('loginForm').onsubmit = function(e) {
     e.preventDefault();
+    console.log("Login in corso...");
+
     const formData = new FormData(this);
     formData.append('action', 'login');
     
-    // Recupera la mail inserita nel primo box per il confronto su Sheets
+    // Recupera la mail dal primo input per sapere chi sta loggando
     const emailSalvata = document.querySelector('input[name="user_email"]').value;
     formData.append('user_email', emailSalvata);
 
@@ -76,38 +78,44 @@ document.getElementById('loginForm').onsubmit = function(e) {
     .then(risposta => {
         if (risposta.includes("OK")) {
             const status = risposta.split("|")[1];
-            localStorage.setItem('userStatus', status); // Aggiorna lo status finale
-            window.location.href = "dashboard.html"; // Vai alla dashboard
+            localStorage.setItem('userStatus', status);
+            window.location.href = "dashboard.html";
         } else {
             alert("CREDENTIALS ERRATE");
         }
-    })
-    .catch(err => console.error("Errore Login:", err));
+    });
 };
 
-// 4. SALVATAGGIO NUOVA PASSWORD (Box Reset)
+// 4. SALVATAGGIO NUOVA PASSWORD (Box Reset con Token)
 document.getElementById('resetForm').onsubmit = function(e) {
     e.preventDefault();
+    console.log("Salvataggio nuova password...");
+
     const pass = document.getElementById('password').value;
     const confirm = document.getElementById('confirm_password').value;
+    const token = document.getElementById('token_input').value;
 
     if (pass !== confirm) {
         alert("Le password non coincidono!");
         return;
     }
 
+    if (!token) {
+        alert("Errore: Token mancante. Riprova dalla mail.");
+        return;
+    }
+
     const formData = new FormData(this);
-    formData.append('action', 'update_password');
-    const emailSalvata = document.querySelector('input[name="user_email"]').value;
-    formData.append('user_email', emailSalvata);
+    // 'action', 'token' e 'new_password' sono già nel form HTML come 'name'
 
     fetch(CONFIG.URL_SHEETS, {
         method: 'POST',
         body: formData
     })
     .then(res => res.text())
-    .then(() => {
-        alert("Password salvata! Ora puoi entrare.");
+    .then(risposta => {
+        console.log("Risposta salvataggio:", risposta);
+        alert("Password impostata! Ora effettua il login.");
         cambiaBox('login-section');
     })
     .catch(err => console.error("Errore Reset:", err));
