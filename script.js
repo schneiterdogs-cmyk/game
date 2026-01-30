@@ -40,23 +40,24 @@ function gestisciNewsletter(event) {
     .then(res => res.text())
     .then(risposta => {
         const parti = risposta.split("|"); 
-        const comando = parti[0];
-        const status = parti[1];
-        const token = parti[2]; 
+        const comando = parti[0];  // Es: VAI_A_RESET
+        const status = parti[1];   // Es: free
+        const token = parti[2];    // Es: TK-123456 (Il pezzo mancante!)
+
+        // Salva lo status locale
         localStorage.setItem('userStatus', status || 'free');
+
         if (comando === "VAI_A_LOGIN") {
             cambiaBox('login-section'); 
-        } else if (comando === "VAI_A_RESET") {
-    if (token) {
-        // ASSICURATI CHE QUESTE RIGHE SIANO ESATTAMENTE COSÌ
-        const tknInput = document.getElementById('token_input');
-        if (tknInput) {
-            tknInput.value = token; // Questo "incolla" il token segreto nel modulo
-            console.log("Token caricato con successo:", token);
-        }
-    }
-    cambiaBox('reset-section'); 
-}
+        } 
+        else if (comando === "VAI_A_RESET") {
+            // --- COSA METTERE: Questa parte riempie il campo nascosto ---
+            const campoToken = document.getElementById('token_input');
+            if (campoToken && token) {
+                campoToken.value = token; 
+                console.log("Token agganciato correttamente:", token);
+            }
+            // ----------------------------------------------------------
             cambiaBox('reset-section'); 
         }
     })
