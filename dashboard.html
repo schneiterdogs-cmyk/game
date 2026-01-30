@@ -1,26 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>DASHBOARD</title>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <style>
+        body { font-family: sans-serif; background: #141414; color: white; padding: 50px; text-align: center; }
+        .content { background: #222; padding: 40px; border-radius: 15px; display: inline-block; min-width: 400px; }
+        .pro-badge { background: #ffd700; color: black; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
+        .premium-box { border: 2px solid #ffd700; margin-top: 20px; padding: 20px; display: none; }
+        button { margin-top: 30px; padding: 10px; cursor: pointer; }
+    </style>
 </head>
-<body id="dash-body">
+<body>
+    <div class="content">
+        <h1>Dashboard Utente</h1>
+        <p id="status-text">Caricamento...</p>
 
-    <h1 id="messaggio">Caricamento...</h1>
+        <div id="area-premium" class="premium-box">
+            <h2>💎 CONTENUTO ESCLUSIVO PRO</h2>
+            <p>Questo video/testo è visibile solo perché sei un membro Premium.</p>
+        </div>
+
+        <div id="area-free">
+            <p>Contenuto base per tutti gli utenti.</p>
+        </div>
+
+        <button onclick="logout()">Esci</button>
+    </div>
 
     <script>
-        // Recuperiamo lo stato (free o premium) salvato durante il login
         const status = localStorage.getItem('userStatus');
-        const body = document.getElementById('dash-body');
-        const titolo = document.getElementById('messaggio');
 
-        if (status === 'premium') {
-            body.style.backgroundColor = "#f1a25c"; // ARANCIONE
-            titolo.innerText = "BENVENUTO NELL'AREA PREMIUM";
+        if (!status) {
+            window.location.href = "index.html";
         } else {
-            body.style.backgroundColor = "#2ecc71"; // VERDE
-            titolo.innerText = "AREA FREE";
+            const statusText = document.getElementById('status-text');
+            if (status.toLowerCase() === 'pro') {
+                statusText.innerHTML = 'Il tuo stato: <span class="pro-badge">MEMBRO PRO</span>';
+                document.getElementById('area-premium').style.display = 'block';
+            } else {
+                statusText.innerHTML = 'Il tuo stato: <b>BASE (FREE)</b>';
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = "index.html";
         }
     </script>
-
 </body>
 </html>
