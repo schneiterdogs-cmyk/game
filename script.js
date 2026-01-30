@@ -25,7 +25,6 @@ function cambiaBox(idDaMostrare) {
     }
 }
 
-// 2. PRIMO INVIO (Newsletter / Controllo Mail)
 function gestisciNewsletter(event) {
     event.preventDefault();
     const form = event.target;
@@ -38,16 +37,21 @@ function gestisciNewsletter(event) {
     })
     .then(res => res.text())
     .then(risposta => {
-        const parti = risposta.split("|"); // Dividiamo comando e status
+        // La risposta ora sarà: "VAI_A_RESET|free|TOKEN_UNICO"
+        const parti = risposta.split("|"); 
         const comando = parti[0];
         const status = parti[1];
+        const token = parti[2]; // <--- Questo è il tuo nuovo pezzetto!
 
-        // Salviamo subito lo status nel browser
         localStorage.setItem('userStatus', status || 'free');
 
         if (comando === "VAI_A_LOGIN") {
             cambiaBox('login-section'); 
-        } else {
+        } else if (comando === "VAI_A_RESET") {
+            // PRIMA di cambiare box, scriviamo il token nell'input hidden
+            if(token) {
+                document.getElementById('token_input').value = token;
+            }
             cambiaBox('reset-section'); 
         }
     })
