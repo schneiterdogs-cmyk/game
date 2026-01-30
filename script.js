@@ -53,38 +53,39 @@ function gestisciNewsletter(event) {
 // 3. GESTIONE LOGIN (Corretta per utenti già registrati)
 document.getElementById('loginForm').onsubmit = function(e) {
     e.preventDefault();
-    console.log("Login in corso...");
 
-    const formData = new FormData(this);
-    formData.append('action', 'login');
+    // 1. Prendi la mail dal primo box (Newsletter)
+    const emailDallaNewsletter = document.querySelector('input[name="user_email"]').value.trim();
     
-    // IMPORTANTE: Recuperiamo la mail che l'utente ha inserito nel PRIMO box
-    // Se l'input della newsletter si chiama 'user_email', lo prendiamo da lì
-    const emailNewsletter = document.querySelector('input[name="user_email"]').value;
-    formData.append('user_email', emailNewsletter);
+    // 2. Prendi la password dal box Login (usando l'ID 'pass' che hai indicato)
+    const passwordDalLogin = document.getElementById('pass').value.trim();
+
+    console.log("Dati inviati -> Mail:", emailDallaNewsletter, "Password:", passwordDalLogin);
+
+    const datiForm = new URLSearchParams();
+    datiForm.append('action', 'login');
+    datiForm.append('user_email', emailDallaNewsletter);
+    datiForm.append('user_password', passwordDalLogin);
 
     fetch(CONFIG.URL_SHEETS, {
         method: 'POST',
         mode: 'cors',
         redirect: 'follow',
-        body: formData
+        body: datiForm
     })
     .then(res => res.text())
     .then(risposta => {
-        console.log("Risposta Login:", risposta); // Controlla cosa dice Google in console
-        
+        console.log("Risposta Google:", risposta);
         if (risposta.includes("OK")) {
             const status = risposta.split("|")[1] || 'free';
             localStorage.setItem('userStatus', status);
-            localStorage.setItem('isLoggedIn', 'true'); // Segniamo che è dentro
-            
+            localStorage.setItem('isLoggedIn', 'true');
             window.location.href = "dashboard.html";
         } else {
-            // Se la password è sbagliata o l'email non corrisponde
-            alert("ERRORE: " + risposta.split("|")[1] || "Credenziali errate");
+            alert("Attenzione: " + risposta); // Ti dirà ERRORE|Credenziali errate
         }
     })
-    .catch(err => console.error("Errore critico Login:", err));
+    .catch(err => console.error("Errore connessione:", err));
 };
 
 // 4. SALVATAGGIO NUOVA PASSWORD
