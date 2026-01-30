@@ -102,47 +102,55 @@ if (loginForm) {
     };
 }
 
-// 4. SALVATAGGIO NUOVA PASSWORD (RESET)
+// 4. SALVATAGGIO NUOVA PASSWORD (Corretto)
 const resetForm = document.getElementById('resetForm');
 if (resetForm) {
     resetForm.onsubmit = function(e) {
         e.preventDefault();
+        
         const pass = document.getElementById('password').value;
         const confirm = document.getElementById('confirm_password').value;
-        const tokenVal = document.getElementById('token_input').value; // Recupero manuale per sicurezza
-        
+        const tokenInput = document.getElementById('token_input');
+        const tokenVal = tokenInput ? tokenInput.value : "";
+
         if (pass !== confirm) {
             alert("Le password non coincidono!");
             return;
         }
 
         if (!tokenVal) {
-            alert("Errore: Token mancante. Riprova dall'inizio.");
+            alert("Errore: Token non trovato nel modulo. Riprova ad inserire la mail.");
             cambiaBox('newsletter-section');
             return;
         }
 
-        const formData = new URLSearchParams();
-        formData.append('action', 'update_password');
-        formData.append('token', tokenVal);
-        formData.append('new_password', pass);
+        // USARE URLSearchParams invece di FormData
+        const datiPerGoogle = new URLSearchParams();
+        datiPerGoogle.append('action', 'update_password');
+        datiPerGoogle.append('token', tokenVal);
+        datiPerGoogle.append('new_password', pass);
+
+        console.log("Tentativo di Reset - Token:", tokenVal);
 
         fetch(CONFIG.URL_SHEETS, {
             method: 'POST',
             mode: 'cors',
-            body: formData
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: datiPerGoogle.toString()
         })
         .then(res => res.text())
         .then(risposta => {
+            console.log("Risposta Server:", risposta);
             if (risposta.includes("PASSWORD_OK")) {
-                const status = risposta.split("|")[1] || 'free';
-                localStorage.setItem('userStatus', status);
-                alert("Password salvata con successo!");
+                alert("Password salvata correttamente!");
                 window.location.href = "dashboard.html"; 
             } else {
-                alert("Errore durante il salvataggio: " + risposta);
+                // Se Google risponde "Token non trovato", l'alert te lo dirà qui
+                alert("Errore dal database: " + risposta);
             }
         })
-        .catch(err => console.error("Errore Reset:", err));
+        .catch(err => console.error("Errore invio:", err));
     };
 }
