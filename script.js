@@ -28,7 +28,6 @@ function cambiaBox(idDaMostrare) {
 // 2. PRIMO INVIO (Newsletter / Controllo Mail)
 function gestisciNewsletter(event) {
     event.preventDefault();
-    console.log("Il tasto è stato premuto!");
     const form = event.target;
     const dati = new FormData(form);
     dati.append('action', 'subscribe');
