@@ -1,8 +1,5 @@
-mio-bottone {
-    background-color: coral;
-    padding: 20px 40px;
-    border-radius: 50px;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
+.newsletter-box {
+    background-color: yellow; /* Colore acceso per vedere bene i confini */
+    padding: 20px;
+    border: 2px solid black;
 }
