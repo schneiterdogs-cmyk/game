@@ -110,6 +110,8 @@ document.getElementById('resetForm').onsubmit = function(e) {
 
     fetch(CONFIG.URL_SHEETS, {
         method: 'POST',
+        mode: 'cors', 
+        redirect: 'follow',
         body: formData
     })
     .then(res => res.text())
