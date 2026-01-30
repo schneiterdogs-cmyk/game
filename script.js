@@ -2,7 +2,7 @@
 function cambiaBox(idDaMostrare) {
     const boxAttuale = document.querySelector('.newsletter-box:not(.hidden), .login-box:not(.hidden), .password-container:not(.hidden)');
     const nuovoBox = document.getElementById(idDaMostrare);
-    if (boxAttuale) {
+    if (boxAttuale && nuovoBox) { // Controllo che entrambi esistano
         boxAttuale.style.opacity = "0";
         boxAttuale.style.transform = "translateY(-10px)";
         setTimeout(() => {
@@ -19,6 +19,12 @@ function cambiaBox(idDaMostrare) {
 }
 
 // 2. PRIMO INVIO (Newsletter / Controllo Mail)
+// Qui usiamo l'ID del form per sicurezza
+const newsForm = document.getElementById('newsletterForm'); // Assicurati di avere questo ID nel HTML
+if (newsForm) {
+    newsForm.onsubmit = gestisciNewsletter;
+}
+
 function gestisciNewsletter(event) {
     event.preventDefault();
     const form = event.target;
@@ -27,8 +33,8 @@ function gestisciNewsletter(event) {
 
     fetch(CONFIG.URL_SHEETS, {
         method: 'POST',
-        mode: 'cors',      // AGGIUNTO PER SICUREZZA
-        redirect: 'follow', // AGGIUNTO PER SICUREZZA
+        mode: 'cors',
+        redirect: 'follow',
         body: dati
     })
     .then(res => res.text())
@@ -42,7 +48,8 @@ function gestisciNewsletter(event) {
             cambiaBox('login-section'); 
         } else if (comando === "VAI_A_RESET") {
             if (token) {
-                document.getElementById('token_input').value = token;
+                const tknInput = document.getElementById('token_input');
+                if(tknInput) tknInput.value = token;
             }
             cambiaBox('reset-section'); 
         }
@@ -50,78 +57,80 @@ function gestisciNewsletter(event) {
     .catch(err => console.error("Errore Newsletter:", err));
 }
 
-// 3. GESTIONE LOGIN (Corretta per utenti già registrati)
-document.getElementById('loginForm').onsubmit = function(e) {
-    e.preventDefault();
+// 3. GESTIONE LOGIN (Esegue solo se il form esiste nella pagina)
+const loginForm = document.getElementById('loginForm');
+if (loginForm) {
+    loginForm.onsubmit = function(e) {
+        e.preventDefault();
+        const emailInput = document.querySelector('input[name="user_email"]');
+        const passInput = document.getElementById('pass');
 
-    // 1. Prendi la mail dal primo box (Newsletter)
-    const emailDallaNewsletter = document.querySelector('input[name="user_email"]').value.trim();
-    
-    // 2. Prendi la password dal box Login (usando l'ID 'pass' che hai indicato)
-    const passwordDalLogin = document.getElementById('pass').value.trim();
+        if (!emailInput || !passInput) return;
 
-    console.log("Dati inviati -> Mail:", emailDallaNewsletter, "Password:", passwordDalLogin);
+        const emailDallaNewsletter = emailInput.value.trim();
+        const passwordDalLogin = passInput.value.trim();
 
-    const datiForm = new URLSearchParams();
-    datiForm.append('action', 'login');
-    datiForm.append('user_email', emailDallaNewsletter);
-    datiForm.append('user_password', passwordDalLogin);
+        const datiForm = new URLSearchParams();
+        datiForm.append('action', 'login');
+        datiForm.append('user_email', emailDallaNewsletter);
+        datiForm.append('user_password', passwordDalLogin);
 
-    fetch(CONFIG.URL_SHEETS, {
-        method: 'POST',
-        mode: 'cors',
-        redirect: 'follow',
-        body: datiForm
-    })
-    .then(res => res.text())
-    .then(risposta => {
-        console.log("Risposta Google:", risposta);
-        if (risposta.includes("OK")) {
-            const status = risposta.split("|")[1] || 'free';
-            localStorage.setItem('userStatus', status);
-            localStorage.setItem('isLoggedIn', 'true');
-            window.location.href = "dashboard.html";
-        } else {
-            alert("Attenzione: " + risposta); // Ti dirà ERRORE|Credenziali errate
+        fetch(CONFIG.URL_SHEETS, {
+            method: 'POST',
+            mode: 'cors',
+            redirect: 'follow',
+            body: datiForm
+        })
+        .then(res => res.text())
+        .then(risposta => {
+            if (risposta.includes("OK")) {
+                const status = risposta.split("|")[1] || 'free';
+                localStorage.setItem('userStatus', status);
+                localStorage.setItem('isLoggedIn', 'true');
+                window.location.href = "dashboard.html";
+            } else {
+                alert("Attenzione: " + risposta);
+            }
+        })
+        .catch(err => console.error("Errore connessione:", err));
+    };
+}
+
+// 4. SALVATAGGIO NUOVA PASSWORD (Esegue solo se il form esiste)
+const resetForm = document.getElementById('resetForm');
+if (resetForm) {
+    resetForm.onsubmit = function(e) {
+        e.preventDefault();
+        const pass = document.getElementById('password').value;
+        const confirm = document.getElementById('confirm_password').value;
+        
+        if (pass !== confirm) {
+            alert("Le password non coincidono!");
+            return;
         }
-    })
-    .catch(err => console.error("Errore connessione:", err));
-};
 
-// 4. SALVATAGGIO NUOVA PASSWORD
-document.getElementById('resetForm').onsubmit = function(e) {
-    e.preventDefault();
-    const pass = document.getElementById('password').value;
-    const confirm = document.getElementById('confirm_password').value;
-    const token = document.getElementById('token_input').value;
+        const formData = new FormData(this);
+        // Assicurati che l'action sia corretta per lo script GAS
+        formData.append('action', 'update_password'); 
 
-    if (pass !== confirm) {
-        alert("Le password non coincidono!");
-        return;
-    }
-
-    const formData = new FormData(this);
-
-    fetch(CONFIG.URL_SHEETS, {
-        method: 'POST',
-        mode: 'cors',
-        redirect: 'follow',
-        body: formData
-    })
-    .then(res => res.text())
-    .then(risposta => {
-        if (risposta.includes("PASSWORD_OK")) {
-            const status = risposta.split("|")[1] || 'free';
-            localStorage.setItem('userStatus', status);
-            alert("Password salvata! Accesso in corso...");
-            window.location.href = "dashboard.html"; 
-        } else {
-            alert("Errore: " + risposta);
-            cambiaBox('login-section');
-        }
-    })
-    .catch(err => {
-        console.error("Errore Reset:", err);
-        alert("Errore di connessione durante il salvataggio.");
-    });
-};
+        fetch(CONFIG.URL_SHEETS, {
+            method: 'POST',
+            mode: 'cors',
+            redirect: 'follow',
+            body: formData
+        })
+        .then(res => res.text())
+        .then(risposta => {
+            if (risposta.includes("PASSWORD_OK")) {
+                const status = risposta.split("|")[1] || 'free';
+                localStorage.setItem('userStatus', status);
+                alert("Password salvata! Accesso in corso...");
+                window.location.href = "dashboard.html"; 
+            } else {
+                alert("Errore: " + risposta);
+                cambiaBox('login-section');
+            }
+        })
+        .catch(err => console.error("Errore Reset:", err));
+    };
+}
