@@ -67,38 +67,57 @@ function gestisciNewsletter(event) {
     .catch(err => console.error("Errore Newsletter:", err));
 }
 
-// 3. GESTIONE LOGIN
+// 3. GESTIONE LOGIN (Versione Corretta)
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
     loginForm.onsubmit = function(e) {
         e.preventDefault();
         
-        // Prendiamo la mail dal primo form (newsletter) se non è nel login
-        const emailNewsletter = document.querySelector('#newsletterForm input[name="user_email"]')?.value;
-        const passwordDalLogin = document.getElementById('pass').value;
+        // Recuperiamo la mail che l'utente ha scritto nel PRIMO box (newsletterForm)
+        const emailInput = document.querySelector('#newsletterForm input[name="user_email"]');
+        const passInput = document.getElementById('pass');
 
-        const datiForm = new URLSearchParams();
-        datiForm.append('action', 'login');
-        datiForm.append('user_email', emailNewsletter);
-        datiForm.append('user_password', passwordDalLogin);
+        if (!emailInput || !passInput) {
+            alert("Errore tecnico: Campi non trovati.");
+            return;
+        }
+
+        const emailVal = emailInput.value.trim().toLowerCase();
+        const passVal = passInput.value.trim();
+
+        // Usiamo URLSearchParams (lo standard che piace a Google)
+        const datiLogin = new URLSearchParams();
+        datiLogin.append('action', 'login');
+        datiLogin.append('user_email', emailVal);
+        datiLogin.append('user_password', passVal);
+
+        console.log("Tentativo Login per:", emailVal);
 
         fetch(CONFIG.URL_SHEETS, {
             method: 'POST',
             mode: 'cors',
-            body: datiForm
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: datiLogin.toString()
         })
         .then(res => res.text())
         .then(risposta => {
+            console.log("Risposta Login:", risposta);
             if (risposta.includes("OK")) {
-                const status = risposta.split("|")[1] || 'free';
+                const parti = risposta.split("|");
+                const status = parti[1] || 'free';
+                
                 localStorage.setItem('userStatus', status);
+                localStorage.setItem('userEmail', emailVal); // Salviamo la mail per la dashboard
                 localStorage.setItem('isLoggedIn', 'true');
+                
                 window.location.href = "dashboard.html";
             } else {
-                alert("Errore: " + risposta);
+                alert("Accesso negato: " + risposta);
             }
         })
-        .catch(err => console.error("Errore connessione:", err));
+        .catch(err => console.error("Errore Login:", err));
     };
 }
 
