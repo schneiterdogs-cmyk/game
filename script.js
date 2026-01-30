@@ -1,27 +1,22 @@
-// Questa funzione intercetta il click e invia i dati "sottobanco"
 function gestisciNewsletter(event) {
-    event.preventDefault(); // BLOCCA L'ERRORE: impedisce al browser di cambiare pagina
-
+    event.preventDefault();
     const form = event.target;
     const dati = new FormData(form);
 
-    // Spediamo i dati a Google Sheets
     fetch(CONFIG.URL_SHEETS, {
         method: 'POST',
-        body: dati,
-        mode: 'no-cors' // Fondamentale per parlare con Google senza errori di sicurezza
+        body: dati
     })
-    .then(() => {
-        alert("Email inviata correttamente!"); 
-        // Qui la pagina resta ferma, non va in errore.
+    .then(res => res.text()) // Leggiamo la risposta (VAI_A_LOGIN o VAI_A_RESET)
+    .then(risposta => {
+        if (risposta === "VAI_A_LOGIN") {
+            alert("Bentornato! Inserisci la tua password.");
+            cambiaBox('login-section'); 
+        } else {
+            alert("Nuovo utente! Ti abbiamo inviato il link per la password.");
+            // Qui potresti mostrare il reset o un messaggio di attesa mail
+            cambiaBox('reset-section'); 
+        }
     })
-    .catch(errore => console.error("Errore:", errore));
+    .catch(err => console.error("Errore:", err));
 }
-
-// Colleghiamo la funzione al tuo form della newsletter
-document.addEventListener("DOMContentLoaded", function() {
-    const formNewsletter = document.querySelector('.newsletter-box form');
-    if (formNewsletter) {
-        formNewsletter.onsubmit = gestisciNewsletter;
-    }
-});
