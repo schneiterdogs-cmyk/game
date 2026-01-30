@@ -135,3 +135,9 @@ document.getElementById('resetForm').onsubmit = function(e) {
             alert("Errore: " + risposta);
             cambiaBox('login-section');
         }
+        })
+    .catch(err => {
+        console.error("Errore Reset:", err);
+        alert("Errore di connessione durante il salvataggio.");
+    });
+};
