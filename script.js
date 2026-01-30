@@ -1,29 +1,27 @@
-// Gestione invio silenzioso (Fetch)
-function gestisciInvio(event) {
-    event.preventDefault(); // Blocca l'errore e il ricaricamento della pagina
+// Questa funzione intercetta il click e invia i dati "sottobanco"
+function gestisciNewsletter(event) {
+    event.preventDefault(); // BLOCCA L'ERRORE: impedisce al browser di cambiare pagina
 
     const form = event.target;
-    const formData = new FormData(form);
+    const dati = new FormData(form);
 
-    // Invia i dati a Google Sheets
+    // Spediamo i dati a Google Sheets
     fetch(CONFIG.URL_SHEETS, {
         method: 'POST',
-        body: formData,
-        mode: 'no-cors' 
+        body: dati,
+        mode: 'no-cors' // Fondamentale per parlare con Google senza errori di sicurezza
     })
     .then(() => {
-        alert("Dati inviati al database!");
-        // Qui in futuro metteremo il comando per cambiare box
+        alert("Email inviata correttamente!"); 
+        // Qui la pagina resta ferma, non va in errore.
     })
-    .catch(error => {
-        console.error("Errore:", error);
-    });
+    .catch(errore => console.error("Errore:", errore));
 }
 
-// Quando la pagina carica, attiva il controllo sui form
+// Colleghiamo la funzione al tuo form della newsletter
 document.addEventListener("DOMContentLoaded", function() {
-    const newsletterForm = document.querySelector('.newsletter-box form');
-    if (newsletterForm) {
-        newsletterForm.addEventListener('submit', gestisciInvio);
+    const formNewsletter = document.querySelector('.newsletter-box form');
+    if (formNewsletter) {
+        formNewsletter.onsubmit = gestisciNewsletter;
     }
 });
