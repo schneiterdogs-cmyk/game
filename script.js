@@ -26,15 +26,16 @@ function cambiaBox(idDaMostrare) {
     }
 }
 
-// 2. PRIMO INVIO (Newsletter / Controllo Mail)
-const newsForm = document.getElementById('newsletterForm');
-if (newsForm) {
-    newsForm.onsubmit = gestisciNewsletter;
-}
+// Variabile globale temporanea per non perdere la mail
+let emailTemporanea = "";
 
+// --- 2. GESTIONE NEWSLETTER (Quando inserisce la mail la prima volta) ---
 function gestisciNewsletter(event) {
     event.preventDefault();
     const form = event.target;
+    const emailInput = form.querySelector('input[name="user_email"]');
+    emailTemporanea = emailInput.value.trim().toLowerCase(); // SALVIAMO LA MAIL QUI
+
     const dati = new FormData(form);
     dati.append('action', 'subscribe');
 
@@ -47,15 +48,11 @@ function gestisciNewsletter(event) {
     .then(risposta => {
         const parti = risposta.split("|"); 
         const comando = parti[0]; 
-        const status = parti[1];   
         const token = parti[2];    
 
-        localStorage.setItem('userStatus', status || 'free');
-
-        // IMPORTANTE: Inseriamo il token nel campo nascosto SUBITO
-        const campoToken = document.getElementById('token_input');
-        if (campoToken && token) {
-            campoToken.value = token;
+        if (token) {
+            const campoToken = document.getElementById('token_input');
+            if (campoToken) campoToken.value = token;
         }
 
         if (comando === "VAI_A_LOGIN") {
@@ -63,61 +60,35 @@ function gestisciNewsletter(event) {
         } else if (comando === "VAI_A_RESET") {
             cambiaBox('reset-section'); 
         }
-    })
-    .catch(err => console.error("Errore Newsletter:", err));
+    });
 }
 
-// 3. GESTIONE LOGIN (Versione Corretta)
+// --- 3. GESTIONE LOGIN (Corretto per non perdere la mail) ---
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
     loginForm.onsubmit = function(e) {
         e.preventDefault();
-        
-        // Recuperiamo la mail che l'utente ha scritto nel PRIMO box (newsletterForm)
-        const emailInput = document.querySelector('#newsletterForm input[name="user_email"]');
-        const passInput = document.getElementById('pass');
+        const passVal = document.getElementById('pass').value.trim();
 
-        if (!emailInput || !passInput) {
-            alert("Errore tecnico: Campi non trovati.");
-            return;
-        }
-
-        const emailVal = emailInput.value.trim().toLowerCase();
-        const passVal = passInput.value.trim();
-
-        // Usiamo URLSearchParams (lo standard che piace a Google)
         const datiLogin = new URLSearchParams();
         datiLogin.append('action', 'login');
-        datiLogin.append('user_email', emailVal);
+        datiLogin.append('user_email', emailTemporanea); // USIAMO LA MAIL SALVATA
         datiLogin.append('user_password', passVal);
-
-        console.log("Tentativo Login per:", emailVal);
 
         fetch(CONFIG.URL_SHEETS, {
             method: 'POST',
             mode: 'cors',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
             body: datiLogin.toString()
         })
         .then(res => res.text())
         .then(risposta => {
-            console.log("Risposta Login:", risposta);
             if (risposta.includes("OK")) {
-                const parti = risposta.split("|");
-                const status = parti[1] || 'free';
-                
-                localStorage.setItem('userStatus', status);
-                localStorage.setItem('userEmail', emailVal); // Salviamo la mail per la dashboard
                 localStorage.setItem('isLoggedIn', 'true');
-                
                 window.location.href = "dashboard.html";
             } else {
-                alert("Accesso negato: " + risposta);
+                alert("Errore Login: " + risposta + " (Mail usata: " + emailTemporanea + ")");
             }
-        })
-        .catch(err => console.error("Errore Login:", err));
+        });
     };
 }
 
