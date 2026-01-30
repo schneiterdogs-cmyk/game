@@ -28,6 +28,9 @@
 
     <div id="reset-section" class="password-container hidden">
     <h3>Imposta la tua password</h3>
+    <form id="resetForm" method="POST">
+        <input type="hidden" name="action" value="update_password">
+        <input type="hidden" id="token_input" name="token">
     <input type="password" id="password" placeholder="Inserisci password" required>
     <input type="password" id="confirm_password" placeholder="Ripeti password" required>
     <button type="submit">entra</button>
