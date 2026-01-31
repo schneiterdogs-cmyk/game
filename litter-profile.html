@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Dettaglio Cucciolata - Sheepdog DB</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: white; margin: 0; padding: 0; }
+        
+        /* Header Dinamico */
+        .litter-hero { height: 250px; background: linear-gradient(45deg, #1a1a1a, #333); display: flex; align-items: center; justify-content: center; position: relative; border-bottom: 2px solid #FF9800; }
+        .status-tag { position: absolute; top: 20px; right: 20px; background: #FF9800; color: black; padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 11px; text-transform: uppercase; }
+
+        /* VS Mode: Padre e Madre */
+        .matchup { display: flex; align-items: center; justify-content: space-around; width: 100%; max-width: 500px; z-index: 1; }
+        .parent-circle { text-align: center; }
+        .parent-circle img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid #444; object-fit: cover; background: #222; }
+        .parent-circle.father img { border-color: #3498db; }
+        .parent-circle.mother img { border-color: #e91e63; }
+        .parent-circle p { margin: 8px 0 0; font-weight: bold; font-size: 14px; }
+        .vs-icon { font-size: 20px; color: #FF9800; font-style: italic; font-weight: 900; opacity: 0.5; }
+
+        .content { padding: 20px; max-width: 600px; margin: 0 auto; }
+
+        /* Box Dati */
+        .litter-info { background: #1a1a1a; padding: 20px; border-radius: 20px; margin-top: -30px; position: relative; border: 1px solid #333; }
+        .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #2a2a2a; }
+        .info-row:last-child { border: 0; }
+        .info-row span:first-child { color: #666; font-size: 13px; }
+        .info-row span:last-child { font-weight: bold; }
+
+        /* Box Genetica */
+        .genetic-preview { margin-top: 25px; background: #1a1a1a; padding: 20px; border-radius: 20px; border-left: 5px solid #FF9800; }
+        .genetic-stats { display: flex; gap: 20px; margin-top: 15px; }
+        .g-stat { flex: 1; }
+        .g-stat small { display: block; color: #666; font-size: 10px; text-transform: uppercase; }
+        .g-stat b { font-size: 18px; color: #FF9800; }
+
+        /* Bottone Azione */
+        .btn-reserve { display: block; width: 100%; background: #FF9800; color: black; text-align: center; padding: 18px; border-radius: 15px; text-decoration: none; font-weight: bold; margin-top: 30px; transition: 0.3s; }
+        .btn-reserve:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255,152,0,0.2); }
+    </style>
+</head>
+<body>
+
+<div class="litter-hero">
+    <div class="status-tag">Cuccioli Nati</div>
+    
+    <div class="matchup">
+        <div class="parent-circle father">
+            <img src="https://via.placeholder.com/150" alt="Padre">
+            <p>MOSS</p>
+        </div>
+        <div class="vs-icon">X</div>
+        <div class="parent-circle mother">
+            <img src="https://via.placeholder.com/150" alt="Madre">
+            <p>LADY</p>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="litter-info">
+        <div class="info-row">
+            <span>Data di Nascita</span>
+            <span>15 Gennaio 2026</span>
+        </div>
+        <div class="info-row">
+            <span>Cuccioli Disponibili</span>
+            <span style="color: #4CAF50;">3 Maschi / 2 Femmine</span>
+        </div>
+        <div class="info-row">
+            <span>Località</span>
+            <span>Arezzo, Italia</span>
+        </div>
+        <div class="info-row">
+            <span>Allevamento</span>
+            <span>Glen Sheepdogs</span>
+        </div>
+    </div>
+
+    <div class="genetic-preview">
+        <h4 style="margin: 0; font-size: 14px; color: #888;">DATI GENETICI ESTIMATI</h4>
+        <div class="genetic-stats">
+            <div class="g-stat">
+                <small>Consanguineità</small>
+                <b>3.2% COI</b>
+            </div>
+            <div class="g-stat">
+                <small>Omogeneità</small>
+                <b>95% AVK</b>
+            </div>
+        </div>
+        <a href="pedigree-builder.html" style="display:inline-block; margin-top: 15px; color: #FF9800; font-size: 12px; text-decoration: none; font-weight: bold;">
+            ESAMINA PEDIGREE COMPLETO →
+        </a>
+    </div>
+
+    <a href="https://wa.me/3912345678" class="btn-reserve">
+        <i class="fab fa-whatsapp"></i> PRENOTA UN CUCCIOLO
+    </a>
+    
+    <p style="text-align: center; color: #444; font-size: 11px; margin-top: 20px;">
+        ID Cucciolata: #LC0042 - Registrata su Sheepdog DB
+    </p>
+</div>
+
+</body>
+</html>
