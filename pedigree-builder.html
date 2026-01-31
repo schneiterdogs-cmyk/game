@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Pedigree Creator & COI - Sheepdog DB</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: sans-serif; background: #111; color: white; margin: 0; padding: 15px; }
+        .header { text-align: center; padding: 20px 0; border-bottom: 1px solid #333; }
+        .header h2 { color: #4CAF50; margin: 0; }
+        
+        /* Box Risultati Scientifici */
+        .stats-container { display: flex; gap: 15px; margin: 20px 0; }
+        .stat-card { flex: 1; background: #222; padding: 15px; border-radius: 12px; text-align: center; border-bottom: 4px solid #4CAF50; }
+        .stat-card h3 { margin: 0; font-size: 24px; color: #fff; }
+        .stat-card span { font-size: 11px; color: #888; text-transform: uppercase; }
+        .high-risk { border-color: #f44336 !important; }
+
+        /* Struttura Albero (Semplificata per Mobile) */
+        .tree-container { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .node { background: #2a2a2a; padding: 12px; border-radius: 8px; border-left: 5px solid #444; position: relative; }
+        .node.male { border-left-color: #3498db; }
+        .node.female { border-left-color: #e91e63; }
+        .node small { color: #666; font-size: 10px; display: block; }
+        
+        .generation-1 { margin-left: 0px; }
+        .generation-2 { margin-left: 20px; font-size: 0.9em; }
+        .generation-3 { margin-left: 40px; font-size: 0.8em; }
+
+        .btn-calculate { width: 100%; padding: 15px; background: #4CAF50; border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2><i class="fas fa-microscope"></i> Analisi Pedigree</h2>
+</div>
+
+<div class="stats-container">
+    <div class="stat-card" id="coiCard">
+        <h3 id="coiVal">0.0%</h3>
+        <span>Inbreeding (COI)</span>
+    </div>
+    <div class="stat-card">
+        <h3 id="avkVal">100%</h3>
+        <span>Diversità (AVK)</span>
+    </div>
+</div>
+
+<div class="tree-container">
+    <div class="section-title" style="color:#555; font-size:12px; text-transform:uppercase;">Simulazione Accoppiamento</div>
+    
+    <div class="node male">
+        <small>PADRE</small>
+        <div id="fatherName">Seleziona Stallone...</div>
+    </div>
+    <div class="node female">
+        <small>MADRE</small>
+        <div id="motherName">Seleziona Fattrice...</div>
+    </div>
+
+    <div class="section-title" style="color:#555; font-size:12px; text-transform:uppercase; margin-top:15px;">Anteprima Linee (2° Gen)</div>
+    <div class="node male generation-2">Paternal Grandfather</div>
+    <div class="node female generation-2">Paternal Grandmother</div>
+    <div class="node male generation-2">Maternal Grandfather</div>
+    <div class="node female generation-2">Maternal Grandmother</div>
+</div>
+
+<button class="btn-calculate" onclick="calculateGenetic()">CALCOLA COEFFICIENTI</button>
+
+<script>
+    function calculateGenetic() {
+        // Logica finta per la bozza
+        const coi = (Math.random() * 15).toFixed(1);
+        const avk = (80 + Math.random() * 20).toFixed(1);
+        
+        document.getElementById('coiVal').innerText = coi + "%";
+        document.getElementById('avkVal').innerText = avk + "%";
+        
+        if(coi > 10) {
+            document.getElementById('coiCard').classList.add('high-risk');
+        } else {
+            document.getElementById('coiCard').classList.remove('high-risk');
+        }
+    }
+</script>
+
+</body>
+</html>
