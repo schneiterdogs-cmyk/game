@@ -1,43 +1,143 @@
-<div class="section-title">Genitori (Ricerca Automatica)</div>
-<div style="display: flex; gap: 15px; margin-top: 10px;">
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Registra Cucciolata - Sheepdog DB</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #141414; color: white; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: #222; padding: 25px; border-radius: 15px; border-top: 5px solid #FF9800; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        h2 { margin-top: 0; color: #FF9800; display: flex; align-items: center; gap: 10px; }
+        .section-title { font-size: 11px; color: #666; text-transform: uppercase; margin-top: 25px; border-bottom: 1px solid #333; padding-bottom: 5px; letter-spacing: 1px; }
+        
+        label { display: block; margin-top: 15px; font-size: 13px; color: #aaa; }
+        input, select { 
+            width: 100%; padding: 12px; margin-top: 5px; 
+            background: #2a2a2a; border: 1px solid #444; 
+            color: white; border-radius: 8px; box-sizing: border-box; outline: none;
+        }
+        input:focus { border-color: #FF9800; }
+
+        /* Griglia Genitori */
+        .parents-grid { display: flex; gap: 15px; margin-top: 10px; }
+        .parent-box { flex: 1; position: relative; }
+        .parent-box.father label { color: #3498db; }
+        .parent-box.mother label { color: #e91e63; }
+
+        /* Risultati Ricerca */
+        .search-results {
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: #333; border: 1px solid #444; z-index: 100;
+            max-height: 200px; overflow-y: auto; border-radius: 0 0 8px 8px;
+            display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .result-item { padding: 12px; border-bottom: 1px solid #444; cursor: pointer; }
+        .result-item:hover { background: #444; }
+        .result-item small { color: #888; display: block; font-size: 11px; }
+
+        /* Tasto Add New se non trovato */
+        .add-new-btn { 
+            padding: 10px; background: #333; color: #FF9800; border: 1px dashed #FF9800;
+            width: 100%; text-align: center; cursor: pointer; font-size: 12px; border-radius: 5px; margin-top: 5px;
+        }
+
+        /* Lista Cuccioli */
+        .puppy-row { 
+            background: #2a2a2a; padding: 15px; border-radius: 10px; margin-top: 10px;
+            display: grid; grid-template-columns: 2fr 1fr auto; gap: 10px; align-items: end;
+            border-left: 4px solid #555;
+        }
+
+        .btn-add-puppy { 
+            background: transparent; color: #aaa; border: 1px dashed #444; 
+            width: 100%; padding: 12px; margin-top: 15px; border-radius: 8px; cursor: pointer; transition: 0.3s;
+        }
+        .btn-add-puppy:hover { border-color: #FF9800; color: #FF9800; }
+
+        /* Tasti Finale */
+        .footer-btns { margin-top: 40px; display: flex; gap: 10px; }
+        .btn-save { flex: 2; padding: 16px; background: #FF9800; border: none; color: white; font-weight: bold; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        .btn-cancel { flex: 1; padding: 16px; background: #444; border: none; color: #ccc; border-radius: 8px; cursor: pointer; }
+        
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2><i class="fas fa-paw"></i> Nuova Cucciolata</h2>
     
-    <div style="flex: 1; position: relative;">
-        <label style="color: #3498db;">Padre (Stallone)</label>
-        <input type="text" id="searchFather" placeholder="Cerca nome o ISDS..." onkeyup="filterDogs('father')">
-        <div id="resultsFather" class="search-results"></div>
-        <input type="hidden" id="selectedFatherID">
-    </div>
+    <form id="litterForm">
+        <div class="section-title">Dati Generali</div>
+        <label>Data di Nascita</label>
+        <input type="date" required>
 
-    <div style="flex: 1; position: relative;">
-        <label style="color: #e91e63;">Madre (Fattrice)</label>
-        <input type="text" id="searchMother" placeholder="Cerca nome o ISDS..." onkeyup="filterDogs('mother')">
-        <div id="resultsMother" class="search-results"></div>
-        <input type="hidden" id="selectedMotherID">
-    </div>
+        <div class="section-title">Genitori</div>
+        <div class="parents-grid">
+            <div class="parent-box father">
+                <label><i class="fas fa-mars"></i> Padre</label>
+                <input type="text" id="fatherInput" placeholder="Cerca..." onkeyup="searchDog('father')">
+                <div id="fatherResults" class="search-results">
+                    <div class="add-new-btn" onclick="location.href='register-dog.html'"><i class="fas fa-plus"></i> Non trovato? Aggiungi Cane</div>
+                </div>
+            </div>
 
+            <div class="parent-box mother">
+                <label><i class="fas fa-venus"></i> Madre</label>
+                <input type="text" id="motherInput" placeholder="Cerca..." onkeyup="searchDog('mother')">
+                <div id="motherResults" class="search-results">
+                    <div class="add-new-btn" onclick="location.href='register-dog.html'"><i class="fas fa-plus"></i> Non trovata? Aggiungi Cane</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">Cuccioli</div>
+        <div id="puppyList">
+            <div class="puppy-row">
+                <div>
+                    <label>Nome / Collare</label>
+                    <input type="text" placeholder="Es: Roy">
+                </div>
+                <div>
+                    <label>Sesso</label>
+                    <select><option>M</option><option>F</option></select>
+                </div>
+                <div style="padding-bottom:12px; color:#555;"><i class="fas fa-trash"></i></div>
+            </div>
+        </div>
+
+        <button type="button" class="btn-add-puppy" onclick="addPuppy()">
+            <i class="fas fa-plus-circle"></i> Aggiungi Cucciolo
+        </button>
+
+        <div class="footer-btns">
+            <button type="button" class="btn-cancel" onclick="window.history.back()">ANNULLA</button>
+            <button type="button" class="btn-save" onclick="alert('Salvataggio cucciolata in corso...')">REGISTRA CUCCIOLATA</button>
+        </div>
+    </form>
 </div>
 
-<style>
-    /* Stile per i suggerimenti che appaiono sotto */
-    .search-results {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: #333;
-        border: 1px solid #444;
-        z-index: 10;
-        max-height: 150px;
-        overflow-y: auto;
-        border-radius: 0 0 8px 8px;
-        display: none; /* Nascosto di base */
+<script>
+    // Funzione finta per mostrare come appare la ricerca
+    function searchDog(type) {
+        const results = document.getElementById(type + 'Results');
+        results.style.display = 'block';
+        // Qui andrà la logica per filtrare i cani dal database
     }
-    .result-item {
-        padding: 10px;
-        border-bottom: 1px solid #444;
-        cursor: pointer;
-        font-size: 13px;
+
+    function addPuppy() {
+        const list = document.getElementById('puppyList');
+        const div = document.createElement('div');
+        div.className = 'puppy-row';
+        div.innerHTML = `
+            <div><input type="text" placeholder="Nome"></div>
+            <div><select><option>M</option><option>F</option></select></div>
+            <div style="padding-bottom:12px; color:#ff4444; cursor:pointer;" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></div>
+        `;
+        list.appendChild(div);
     }
-    .result-item:hover { background: #444; }
-    .result-item small { color: #888; display: block; }
-</style>
+</script>
+
+</body>
+</html>
