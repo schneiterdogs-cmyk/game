@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Registra Cane - Sheepdog DB</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: sans-serif; background: #141414; color: white; margin: 0; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: #222; padding: 25px; border-radius: 15px; border-top: 5px solid #4CAF50; transition: border-color 0.3s; }
+        
+        /* Se in vendita, la card diventa arancione */
+        .mode-sale { border-top-color: #FF9800 !important; }
+
+        h2 { margin-top: 0; color: #4CAF50; transition: color 0.3s; }
+        .mode-sale h2 { color: #FF9800; }
+
+        label { display: block; margin-top: 15px; font-size: 13px; color: #888; text-transform: uppercase; }
+        
+        input, select { 
+            width: 100%; padding: 12px; margin-top: 5px; 
+            background: #333; border: 1px solid #444; 
+            color: white; border-radius: 8px; box-sizing: border-box; 
+        }
+
+        .section-title { font-size: 11px; color: #555; margin-top: 25px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+
+        /* Stile Toggle */
+        .row-toggle { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 10px; background: #2a2a2a; border-radius: 8px; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .4s; border-radius: 22px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #4CAF50; }
+        input:checked:disabled + .slider { background-color: #555; }
+        input:checked + .slider:before { transform: translateX(22px); }
+        
+        /* Se PRO e attivo vendita, slider diventa arancione */
+        .mode-sale input:checked + .slider { background-color: #FF9800; }
+
+        .btn-save { 
+            width: 100%; padding: 16px; background: #4CAF50; border: none; 
+            color: white; font-weight: bold; font-size: 16px; 
+            border-radius: 8px; cursor: pointer; margin-top: 30px; transition: 0.3s;
+        }
+        .mode-sale .btn-save { background: #FF9800; }
+
+        .lock-text { color: #FF9800; font-size: 11px; margin-top: 4px; display: block; }
+        .disabled-label { opacity: 0.5; }
+    </style>
+</head>
+<body id="pageBody">
+
+<div class="container" id="formContainer">
+    <h2 id="formTitle">Nuovo Soggetto</h2>
+    
+    <form id="dogForm">
+        <label>Nome Ufficiale</label>
+        <input type="text" placeholder="Es: Moss" required>
+        
+        <div style="display: flex; gap: 10px;">
+            <div style="flex:1">
+                <label>Sesso</label>
+                <select><option>M</option><option>F</option></select>
+            </div>
+            <div style="flex:2">
+                <label>Data di Nascita</label>
+                <input type="date">
+            </div>
+        </div>
+
+        <label>Microchip</label>
+        <input type="text" placeholder="380...">
+
+        <div style="display: flex; gap: 10px;">
+            <div style="flex:1">
+                <label>ISDS #</label>
+                <input type="text">
+            </div>
+            <div style="flex:1">
+                <label>FCI #</label>
+                <input type="text">
+            </div>
+        </div>
+
+        <div class="section-title">Pedigree</div>
+        <div style="display: flex; gap: 10px;">
+            <input type="number" placeholder="ID Padre">
+            <input type="number" placeholder="ID Madre">
+        </div>
+
+        <div class="section-title">Proprietà e Mercato</div>
+        
+        <div class="row-toggle">
+            <span>Sono l'Allevatore</span>
+            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+        </div>
+
+        <div class="row-toggle">
+            <span>Sono il Proprietario</span>
+            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+        </div>
+
+        <div class="row-toggle" id="saleRow">
+            <div>
+                <span id="saleLabel">Metti in Vendita</span>
+                <span id="lockMsg" class="lock-text" style="display:none;"><i class="fas fa-lock"></i> Solo membri PRO</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="saleToggle" onchange="updateTheme()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <button type="button" class="btn-save" onclick="alert('Cane salvato! ID generato dal sistema.')">
+            SALVA NEL DATABASE
+        </button>
+        
+        <center><br><a href="#" onclick="history.back()" style="color:#666; text-decoration:none; font-size:13px;">Annulla e torna indietro</a></center>
+    </form>
+</div>
+
+<script>
+    // Recuperiamo lo stato dall'utente
+    const userStatus = localStorage.getItem('userStatus') || 'free';
+    const saleToggle = document.getElementById('saleToggle');
+    const lockMsg = document.getElementById('lockMsg');
+    const saleLabel = document.getElementById('saleLabel');
+    const container = document.getElementById('formContainer');
+
+    // Se l'utente è FREE, blocchiamo la vendita
+    if (userStatus.toLowerCase() !== 'pro') {
+        saleToggle.disabled = true;
+        lockMsg.style.display = 'block';
+        saleLabel.classList.add('disabled-label');
+    }
+
+    // Funzione per cambiare colore quando si attiva "In Vendita"
+    function updateTheme() {
+        if (saleToggle.checked) {
+            container.classList.add('mode-sale');
+        } else {
+            container.classList.remove('mode-sale');
+        }
+    }
+</script>
+
+</body>
+</html>
