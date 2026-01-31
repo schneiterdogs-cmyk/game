@@ -1,0 +1,43 @@
+<div class="section-title">Genitori (Ricerca Automatica)</div>
+<div style="display: flex; gap: 15px; margin-top: 10px;">
+    
+    <div style="flex: 1; position: relative;">
+        <label style="color: #3498db;">Padre (Stallone)</label>
+        <input type="text" id="searchFather" placeholder="Cerca nome o ISDS..." onkeyup="filterDogs('father')">
+        <div id="resultsFather" class="search-results"></div>
+        <input type="hidden" id="selectedFatherID">
+    </div>
+
+    <div style="flex: 1; position: relative;">
+        <label style="color: #e91e63;">Madre (Fattrice)</label>
+        <input type="text" id="searchMother" placeholder="Cerca nome o ISDS..." onkeyup="filterDogs('mother')">
+        <div id="resultsMother" class="search-results"></div>
+        <input type="hidden" id="selectedMotherID">
+    </div>
+
+</div>
+
+<style>
+    /* Stile per i suggerimenti che appaiono sotto */
+    .search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #333;
+        border: 1px solid #444;
+        z-index: 10;
+        max-height: 150px;
+        overflow-y: auto;
+        border-radius: 0 0 8px 8px;
+        display: none; /* Nascosto di base */
+    }
+    .result-item {
+        padding: 10px;
+        border-bottom: 1px solid #444;
+        cursor: pointer;
+        font-size: 13px;
+    }
+    .result-item:hover { background: #444; }
+    .result-item small { color: #888; display: block; }
+</style>
