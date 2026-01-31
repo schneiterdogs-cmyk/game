@@ -2,45 +2,101 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard</title>
+    <title>Dashboard Sheepdog DB</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: sans-serif; background: #141414; color: white; padding: 50px; text-align: center; }
-        .content { background: #222; padding: 40px; border-radius: 15px; display: inline-block; min-width: 400px; }
-        .pro-badge { background: #ffd700; color: black; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
-        .premium-box { border: 2px solid #ffd700; margin-top: 20px; padding: 20px; display: none; }
-        button { margin-top: 30px; padding: 10px; cursor: pointer; }
+        /* Manterremo il tuo sfondo scuro ma aggiungiamo i colori dinamici */
+        body { font-family: sans-serif; background: #141414; color: white; margin: 0; padding: 0; text-align: center; }
+        
+        /* Colore dinamico in base allo stato */
+        .status-free { border-top: 8px solid #4CAF50; } /* Verde */
+        .status-pro { border-top: 8px solid #FF9800; }  /* Arancione */
+
+        .header { display: flex; justify-content: space-between; padding: 20px; align-items: center; }
+        .hamburger { font-size: 30px; cursor: pointer; color: white; }
+
+        .content { padding: 20px; }
+
+        /* Pulsante Rotondo Scanner */
+        .scanner-btn {
+            width: 150px; height: 150px; border-radius: 50%; border: none;
+            background: white; color: black; font-weight: bold;
+            font-size: 14px; cursor: pointer; margin: 30px auto;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+        .scanner-btn i { font-size: 40px; margin-bottom: 10px; }
+
+        /* Tasto Carica Immagine */
+        .upload-btn { background: none; border: 1px solid #555; color: #ccc; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 40px; }
+
+        /* Tasti My Dogs e My Litters */
+        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 15px; max-width: 400px; margin: 0 auto; }
+        .grid-btn { 
+            padding: 20px; border-radius: 10px; border: none; font-size: 18px; font-weight: bold; 
+            cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+            background: #333; color: white;
+        }
+
+        /* Colore per Premium (Arancione) */
+        .btn-premium-active { background: #FF9800 !important; color: white; }
+        .lock-icon { font-size: 20px; }
+
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
+<body id="main-body">
+
+    <div class="header">
+        <div id="status-badge" style="font-weight: bold;"></div>
+        <div class="hamburger" onclick="alert('Menu in arrivo!')">☰</div>
+    </div>
+
     <div class="content">
-        <h1>Dashboard Utente</h1>
-        <p id="status-text">Caricamento...</p>
+        <button class="scanner-btn" onclick="alert('Avvio Fotocamera...')">
+            <i class="fas fa-qrcode"></i>
+            SCAN QR
+        </button>
 
-        <div id="area-premium" class="premium-box">
-            <h2>💎 CONTENUTO ESCLUSIVO PRO</h2>
-            <p>Questo video/testo è visibile solo perché sei un membro Premium.</p>
+        <button class="upload-btn" onclick="alert('Apri Galleria...')">
+            <i class="fas fa-image"></i> Carica immagine QR
+        </button>
+
+        <div class="menu-grid">
+            <button class="grid-btn" onclick="location.href='mydogs.html'">
+                MY DOGS <i class="fas fa-dog"></i>
+            </button>
+
+            <button id="btn-litters" class="grid-btn">
+                MY LITTERS <span id="litter-icon"></span>
+            </button>
         </div>
 
-        <div id="area-free">
-            <p>Contenuto base per tutti gli utenti.</p>
-        </div>
-
-        <button onclick="logout()">Esci</button>
+        <br><br>
+        <button onclick="logout()" style="background:none; border:none; color: #555; text-decoration: underline;">Esci</button>
     </div>
 
     <script>
-        const status = localStorage.getItem('userStatus');
+        const status = localStorage.getItem('userStatus') || 'free'; // Default free se manca
+        const body = document.getElementById('main-body');
+        const statusBadge = document.getElementById('status-badge');
+        const btnLitters = document.getElementById('btn-litters');
+        const litterIcon = document.getElementById('litter-icon');
 
-        if (!status) {
-            window.location.href = "index.html";
+        if (status.toLowerCase() === 'pro') {
+            // SETTINGS PREMIUM (ARANCIONE)
+            body.className = 'status-pro';
+            statusBadge.innerHTML = '<span style="color:#FF9800">PREMIUM</span>';
+            btnLitters.className = 'grid-btn btn-premium-active';
+            litterIcon.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            btnLitters.onclick = function() { location.href='mylitters.html'; };
         } else {
-            const statusText = document.getElementById('status-text');
-            if (status.toLowerCase() === 'pro') {
-                statusText.innerHTML = 'Il tuo stato: <span class="pro-badge">MEMBRO PRO</span>';
-                document.getElementById('area-premium').style.display = 'block';
-            } else {
-                statusText.innerHTML = 'Il tuo stato: <b>BASE (FREE)</b>';
-            }
+            // SETTINGS FREE (VERDE)
+            body.className = 'status-free';
+            statusBadge.innerHTML = '<span style="color:#4CAF50">FREE</span>';
+            litterIcon.innerHTML = '<i class="fas fa-lock" style="color:#FF9800"></i>'; // Lucchetto arancione
+            btnLitters.onclick = function() { alert('Questa funzione è solo per utenti Premium!'); };
         }
 
         function logout() {
