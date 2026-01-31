@@ -2,92 +2,135 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Analisi Pedigree - Sheepdog DB</title>
+    <title>Pedigree Builder PRO - Sheepdog DB</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #111; color: white; margin: 0; padding: 15px; }
-        .analyzer-header { background: #222; padding: 20px; border-radius: 15px; margin-bottom: 20px; text-align: center; border: 1px solid #333; }
         
-        /* Stats Scientifiche */
-        .stats-grid { display: flex; gap: 10px; margin-bottom: 20px; }
-        .stat-box { flex: 1; background: #1a1a1a; padding: 15px; border-radius: 10px; border-top: 3px solid #4CAF50; text-align: center; }
-        .stat-box h3 { margin: 5px 0; font-size: 22px; }
-        .stat-box span { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+        /* Box Selezione Iniziale */
+        .selection-panel { background: #1a1a1a; padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; }
+        .inputs-row { display: flex; gap: 15px; margin-bottom: 20px; }
+        .input-group { flex: 1; }
+        .input-group label { display: block; font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 5px; }
+        input { width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; }
 
-        /* Struttura Pedigree a "Scaletta" */
-        .pedigree-table { width: 100%; border-collapse: collapse; background: #1a1a1a; border-radius: 10px; overflow: hidden; font-size: 13px; }
-        .pedigree-table td { border: 1px solid #333; padding: 10px; vertical-align: middle; }
-        
-        .gen-1 { width: 30%; background: #222; font-weight: bold; }
-        .gen-2 { width: 35%; background: #1d1d1d; }
-        .gen-3 { width: 35%; background: #181818; font-size: 11px; }
+        .btn-calc { 
+            width: 100%; padding: 18px; background: #FF9800; border: none; color: black; 
+            font-weight: bold; border-radius: 10px; cursor: pointer; font-size: 16px;
+            transition: 0.3s; box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+        }
+        .btn-calc:active { transform: scale(0.98); }
 
-        /* Evidenziatore soggetti in comune */
-        .common-ancestor { background: rgba(255, 152, 0, 0.2) !important; border: 1px solid #FF9800 !important; color: #FF9800; font-weight: bold; border-radius: 4px; padding: 2px 5px; }
-        
-        .sex-m { color: #3498db; margin-right: 5px; }
-        .sex-f { color: #e91e63; margin-right: 5px; }
+        /* Area Risultati (Nascosta all'inizio) */
+        #resultArea { display: none; animation: fadeIn 0.6s ease; }
 
-        .legend { margin-top: 15px; font-size: 11px; color: #666; display: flex; gap: 10px; justify-content: center; }
-        .legend-item { display: flex; align-items: center; gap: 5px; }
-        .dot-common { width: 10px; height: 10px; background: #FF9800; border-radius: 2px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .stats-grid { display: flex; gap: 10px; margin: 20px 0; }
+        .stat-box { flex: 1; background: #222; padding: 15px; border-radius: 12px; text-align: center; border-top: 4px solid #4CAF50; }
+        .stat-box.warning { border-top-color: #f44336; }
+        .stat-box h3 { margin: 5px 0; font-size: 24px; }
+        .stat-box span { font-size: 10px; color: #666; text-transform: uppercase; }
+
+        /* La Tabella a Scaletta che ti piaceva */
+        .pedigree-table { width: 100%; border-collapse: collapse; background: #1a1a1a; border-radius: 10px; overflow: hidden; font-size: 12px; border: 1px solid #333; }
+        .pedigree-table td { border: 1px solid #333; padding: 8px; vertical-align: middle; }
+        .gen-1 { background: #222; font-weight: bold; width: 30%; color: #FF9800; }
+        .gen-2 { background: #1d1d1d; width: 35%; }
+        .gen-3 { background: #181818; width: 35%; font-size: 10px; color: #aaa; }
+
+        /* Evidenziatore cani in comune */
+        .common-name { background: rgba(255, 152, 0, 0.15); color: #FF9800; border: 1px solid #FF9800; padding: 2px 4px; border-radius: 3px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="analyzer-header">
-    <span style="color: #FF9800; font-size: 12px; font-weight: bold;">SIMULAZIONE ACCOPPIAMENTO</span>
-    <h2 style="margin: 10px 0;">Roy x Fly</h2>
-</div>
-
-<div class="stats-grid">
-    <div class="stat-box">
-        <span>Inbreeding (COI)</span>
-        <h3 style="color: #FF9800;">6.25%</h3>
+    <div class="selection-panel">
+        <h3 style="margin-top:0; font-size: 16px;"><i class="fas fa-flask"></i> Simulatore Accoppiamento</h3>
+        <div class="inputs-row">
+            <div class="input-group">
+                <label>ID o Nome Padre</label>
+                <input type="text" id="fatherIn" placeholder="Es: Roy">
+            </div>
+            <div class="input-group">
+                <label>ID o Nome Madre</label>
+                <input type="text" id="motherIn" placeholder="Es: Fly">
+            </div>
+        </div>
+        <button class="btn-calc" onclick="showPedigree()">CALCOLA PEDIGREE & COI</button>
     </div>
-    <div class="stat-box">
-        <span>Omozigosi (AVK)</span>
-        <h3>87.5%</h3>
+
+    <div id="resultArea">
+        <div class="stats-grid">
+            <div class="stat-box warning">
+                <span>Inbreeding (COI)</span>
+                <h3 id="coiVal">12.5%</h3>
+            </div>
+            <div class="stat-box">
+                <span>Diversità (AVK)</span>
+                <h3 id="avkVal">92.8%</h3>
+            </div>
+        </div>
+
+        <table class="pedigree-table">
+            <tr>
+                <td rowspan="4" class="gen-1">♂ <span id="resFather">Roy</span></td>
+                <td rowspan="2" class="gen-2">♂ <span class="common-name">Moss</span></td>
+                <td class="gen-3">♂ Bob</td>
+            </tr>
+            <tr>
+                <td class="gen-3">♀ Jess</td>
+            </tr>
+            <tr>
+                <td rowspan="2" class="gen-2">♀ Meg</td>
+                <td class="gen-3">♂ Cap</td>
+            </tr>
+            <tr>
+                <td class="gen-3">♀ Nell</td>
+            </tr>
+            <tr>
+                <td rowspan="4" class="gen-1">♀ <span id="resMother">Fly</span></td>
+                <td rowspan="2" class="gen-2">♂ Don</td>
+                <td class="gen-3">♂ <span class="common-name">Moss</span></td>
+            </tr>
+            <tr>
+                <td class="gen-3">♀ Lady</td>
+            </tr>
+            <tr>
+                <td rowspan="2" class="gen-2">♀ Gyp</td>
+                <td class="gen-3">♂ Sid</td>
+            </tr>
+            <tr>
+                <td class="gen-3">♀ Tess</td>
+            </tr>
+        </table>
+        
+        <p style="text-align:center; font-size:11px; color:#555; margin-top:15px;">
+            <i class="fas fa-info-circle"></i> I nomi evidenziati in arancione compaiono in entrambi i rami.
+        </p>
     </div>
-</div>
 
-<table class="pedigree-table">
-    <tr>
-        <td rowspan="4" class="gen-1"><span class="sex-m">♂</span> Padre: <b>Roy</b></td>
-        <td rowspan="2" class="gen-2"><span class="sex-m">♂</span> Nonno P: <span class="common-ancestor">Moss</span></td>
-        <td class="gen-3"><span class="sex-m">♂</span> Bisnonno: Bob</td>
-    </tr>
-    <tr>
-        <td class="gen-3"><span class="sex-f">♀</span> Bisnonna: Jess</td>
-    </tr>
-    <tr>
-        <td rowspan="2" class="gen-2"><span class="sex-f">♀</span> Nonna P: Meg</td>
-        <td class="gen-3"><span class="sex-m">♂</span> Bisnonno: Cap</td>
-    </tr>
-    <tr>
-        <td class="gen-3"><span class="sex-f">♀</span> Bisnonna: Nell</td>
-    </tr>
+    <script>
+        function showPedigree() {
+            // Prende i nomi inseriti
+            const f = document.getElementById('fatherIn').value;
+            const m = document.getElementById('motherIn').value;
 
-    <tr>
-        <td rowspan="4" class="gen-1"><span class="sex-f">♀</span> Madre: <b>Fly</b></td>
-        <td rowspan="2" class="gen-2"><span class="sex-m">♂</span> Nonno M: Spot</td>
-        <td class="gen-3"><span class="sex-m">♂</span> Bisnonno: <span class="common-ancestor">Moss</span></td>
-    </tr>
-    <tr>
-        <td class="gen-3"><span class="sex-f">♀</span> Bisnonna: Lady</td>
-    </tr>
-    <tr>
-        <td rowspan="2" class="gen-2"><span class="sex-f">♀</span> Nonna M: Gyp</td>
-        <td class="gen-3"><span class="sex-m">♂</span> Bisnonno: Don</td>
-    </tr>
-    <tr>
-        <td class="gen-3"><span class="sex-f">♀</span> Bisnonna: Tess</td>
-    </tr>
-</table>
+            if(!f || !m) {
+                alert("Inserisci sia il padre che la madre!");
+                return;
+            }
 
-<div class="legend">
-    <div class="legend-item"><div class="dot-common"></div> Soggetto in comune (Inbreeding)</div>
-</div>
+            // Simula il caricamento e mostra i risultati
+            document.getElementById('resFather').innerText = f;
+            document.getElementById('resMother').innerText = m;
+            document.getElementById('resultArea').style.display = 'block';
+            
+            // Scroll automatico ai risultati
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+    </script>
 
 </body>
 </html>
